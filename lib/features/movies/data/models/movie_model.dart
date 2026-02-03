@@ -1,10 +1,12 @@
-class MovieModel {
+import 'package:equatable/equatable.dart';
+
+class MovieModel extends Equatable {
   final int id;
   final String title;
   final String posterPath;
   final String releaseDate;
 
-  MovieModel({
+  const MovieModel({
     required this.id,
     required this.title,
     required this.posterPath,
@@ -19,4 +21,7 @@ class MovieModel {
       releaseDate: json['release_date'] ?? '',
     );
   }
+
+  @override
+  List<Object?> get props => [id, title, posterPath, releaseDate];
 }

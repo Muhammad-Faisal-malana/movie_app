@@ -24,14 +24,13 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     FetchUpcomingMovies event,
     Emitter<MovieState> emit,
   ) async {
-    // Upcoming movies resets search state usually, or we can preserve it.
-    // Assuming "FetchUpcoming" means "Go Home" or "Reset", let's reset isSearching to false.
+   
     emit(const MovieLoading(isSearching: false));
     try {
       final movies = await repository.getUpcomingMovies();
       emit(MovieListLoaded(movies, isSearching: false));
     } catch (e) {
-      emit(MovieError(e.toString(), isSearching: false));
+      emit(MovieError('Error fetching upcoming movies', isSearching: false));
     }
   }
 
@@ -52,7 +51,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
         ),
       );
     } catch (e) {
-      emit(MovieError(e.toString(), isSearching: state.isSearching));
+      emit(MovieError('Error fetching movie details', isSearching: state.isSearching));
     }
   }
 
@@ -65,7 +64,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       final movies = await repository.searchMovies(event.query);
       emit(MovieListLoaded(movies, isSearching: true));
     } catch (e) {
-      emit(MovieError(e.toString(), isSearching: true));
+      emit(MovieError('Error searching movies', isSearching: true));
     }
   }
 }

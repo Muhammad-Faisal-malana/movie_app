@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:demo_app/core/utils/app_loading_indicator.dart';
 import 'package:demo_app/features/movies/bloc/movie_event.dart';
 import 'package:demo_app/features/movies/bloc/movie_state.dart';
@@ -17,6 +18,7 @@ class MovieListScreen extends StatefulWidget {
 
 class _MovieListScreenState extends State<MovieListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -27,13 +29,19 @@ class _MovieListScreenState extends State<MovieListScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
   void _onSearchChanged(String query) {
-    if (query.isNotEmpty) {
-      context.read<MovieBloc>().add(SearchMovies(query));
-    }
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 900), () {
+      if (query.isNotEmpty) {
+        context.read<MovieBloc>().add(SearchMovies(query));
+      } else {
+        context.read<MovieBloc>().add(FetchUpcomingMovies());
+      }
+    });
   }
 
   @override
@@ -94,7 +102,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
                   physics: const BouncingScrollPhysics(),
                   addRepaintBoundaries: false,
                   addAutomaticKeepAlives: false,
-                  
+
                   itemBuilder: (_, index) {
                     final movie = state.movies[index];
                     return MovieCard(movie: movie);
